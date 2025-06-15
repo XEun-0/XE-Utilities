@@ -18,13 +18,19 @@ function_calls = defaultdict(set)
 call_counts = defaultdict(int)
 called_by = defaultdict(set)
 
-def find_source_files(root='.'):
+def find_source_files(root='.', ignore_hidden=True):
     exts = ('.cpp', '.cc', '.c')
     source_files = []
-    for dirpath, _, filenames in os.walk(root):
+
+    for dirpath, dirnames, filenames in os.walk(root):
+        if ignore_hidden:
+            # Skip hidden directories (those starting with '.')
+            dirnames[:] = [d for d in dirnames if not d.startswith('.')]
         for file in filenames:
             if file.endswith(exts):
-                source_files.append(os.path.join(dirpath, file))
+                full_path = os.path.join(dirpath, file)
+                source_files.append(full_path)
+
     return source_files
 
 def extract_functions_and_calls(filepath):
